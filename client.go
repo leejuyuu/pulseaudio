@@ -48,7 +48,7 @@ type Client struct {
 	conn        net.Conn
 	clientIndex int
 	packets     chan packet
-	updates     chan struct{}
+	events      chan SubscriptionEvent
 	connected   bool
 }
 
@@ -70,7 +70,7 @@ func NewClient(addressArr ...string) (*Client, error) {
 	c := &Client{
 		conn:      conn,
 		packets:   make(chan packet),
-		updates:   make(chan struct{}, 1),
+		events:    make(chan SubscriptionEvent, 1),
 		connected: true,
 	}
 
@@ -94,6 +94,7 @@ func NewClient(addressArr ...string) (*Client, error) {
 const frameSizeMaxAllow = 1024 * 1024 * 16
 
 func (c *Client) processPackets() {
+	defer close(c.events)
 	recv := make(chan *bytes.Buffer)
 	go func(recv chan<- *bytes.Buffer) {
 		var err error
@@ -171,8 +172,18 @@ loop:
 				panic(err)
 			}
 			if rsp == commandSubscribeEvent && tag == 0xffffffff {
+				var t, idx uint32
+				err = bread(buff, uint32Tag, &t, uint32Tag, &idx)
+				if err != nil {
+					panic(err)
+				}
+				evt := SubscriptionEvent{
+					Type:     SubscriptionEventType(t & subscriptionEventTypeMask),
+					Facility: SubscriptionEventFacility(t & subscriptionEventFacilityMask),
+					Idx:      idx,
+				}
 				select {
-				case c.updates <- struct{}{}:
+				case c.events <- evt:
 				default:
 				}
 				continue
