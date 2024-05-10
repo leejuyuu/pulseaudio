@@ -70,7 +70,7 @@ func NewClient(addressArr ...string) (*Client, error) {
 	c := &Client{
 		conn:      conn,
 		packets:   make(chan packet),
-		events:    make(chan SubscriptionEvent, 1),
+		events:    make(chan SubscriptionEvent, 100), // TODO: make the buffer size configurable
 		connected: true,
 	}
 
