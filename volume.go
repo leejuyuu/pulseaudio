@@ -40,6 +40,15 @@ func (c *Client) setSinkVolume(sinkName string, cvolume cvolume) error {
 	return err
 }
 
+func (c *Client) SetSourceVolume(sourceName string, volume float32) error {
+	return c.setSourceVolume(sourceName, cvolume{uint32(volume * 0xffff)})
+}
+
+func (c *Client) setSourceVolume(sourceName string, cvolume cvolume) error {
+	_, err := c.request(commandSetSourceVolume, uint32Tag, uint32(0xffffffff), stringTag, []byte(sourceName), byte(0), cvolume)
+	return err
+}
+
 // ToggleMute reverse mute status
 func (c *Client) ToggleMute() (bool, error) {
 	s, err := c.ServerInfo()
