@@ -125,7 +125,7 @@ func (c *Client) SourceByIndex(idx uint32) (*Source, error) {
 
 // SourceByName queries pulseaudio for a source by name
 func (c *Client) SourceByName(name string) (*Source, error) {
-	b, err := c.request(commandGetSourceInfo, uint32Tag, 0xFFFFFFFF, stringTag, name, byte(0))
+	b, err := c.request(commandGetSourceInfo, uint32Tag, 0xFFFFFFFF, stringTag, name)
 	if err != nil {
 		return nil, err
 	}
