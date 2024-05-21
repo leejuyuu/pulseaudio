@@ -127,3 +127,33 @@ func (c *Client) setDefaultSink(sinkName string) error {
 		stringTag, []byte(sinkName), byte(0))
 	return err
 }
+
+// SinkByIndex queries pulseaudio for a sink by index
+func (c *Client) SinkByIndex(idx uint32) (*Sink, error) {
+	b, err := c.request(commandGetSinkInfo, uint32Tag, idx, stringNullTag)
+	if err != nil {
+		return nil, err
+	}
+
+	var sink Sink
+	err = bread(b, &sink)
+	if err != nil {
+		return nil, err
+	}
+	return &sink, nil
+}
+
+// SinkByName queries pulseaudio for a sink by name
+func (c *Client) SinkByName(name string) (*Sink, error) {
+	b, err := c.request(commandGetSinkInfo, uint32Tag, 0xFFFFFFFF, stringTag, name, rune(0))
+	if err != nil {
+		return nil, err
+	}
+
+	var sink Sink
+	err = bread(b, &sink)
+	if err != nil {
+		return nil, err
+	}
+	return &sink, nil
+}
