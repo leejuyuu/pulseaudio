@@ -145,7 +145,7 @@ func (c *Client) SinkByIndex(idx uint32) (*Sink, error) {
 
 // SinkByName queries pulseaudio for a sink by name
 func (c *Client) SinkByName(name string) (*Sink, error) {
-	b, err := c.request(commandGetSinkInfo, uint32Tag, 0xFFFFFFFF, stringTag, name)
+	b, err := c.request(commandGetSinkInfo, uint32Tag, 0xFFFFFFFF, stringTag, []byte(name), byte(0))
 	if err != nil {
 		return nil, err
 	}
